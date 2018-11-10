@@ -35,7 +35,8 @@ def metadata(sample_id):
 def sample(sample_id):
     sample = samples.loc[samples[sample_id] > 0, ['otu_id', 'otu_label', sample_id]].sort_values(sample_id, ascending=False)
     data = {
-        'values': [id for id in sample['otu_id']],
+        'ids': [id for id in sample['otu_id']],
+        'values': [v for v in sample[sample_id]],
         'labels': [l for l in sample['otu_label']],
         'id': sample_id
     }
