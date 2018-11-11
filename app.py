@@ -28,7 +28,8 @@ def metadata(sample_id):
         'ethnicity': sample['ETHNICITY'],
         'bbtype': sample['BBTYPE'],
         'gender': sample['GENDER'],
-        'location': sample['LOCATION']
+        'location': sample['LOCATION'],
+        'wfreq': sample['WFREQ']
     })
 
 @app.route('/samples/<sample_id>')

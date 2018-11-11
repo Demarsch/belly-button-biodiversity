@@ -6,7 +6,8 @@ function buildMetadata(sample_id) {
       metadataBody.append('p')
         .text(`${key.toUpperCase()}: ${value}`)
         .classed('meta-text', true);
-    }
+    }    
+    buildGaugeChart(sample);
   });
 }
 
@@ -35,7 +36,7 @@ function buildPieChart(data) {
     values: data.values.slice(0, 10),
     labels: data.ids.slice(0, 10).map(x => `OTU ${x}`),
     type: 'pie',
-    title: `Top 10 Bacteria for Sample ${data.id}<br> `,
+    title: `<b>Top 10 Bacteria for Sample ${data.id}</b><br> `,
     titlefont: {
       size: 18
     },
@@ -93,6 +94,88 @@ function buildScatterPlot(data) {
     },   
   };
   Plotly.react('scatter', [trace], layout, { responsive: true });
+}
+
+const maxWfreq = 9;
+
+function buildGaugeChart(sample) {
+  // Calculating the angle we should rotate the arrow to
+  let wfreqToMaxRatio = 1 - Math.min(sample.wfreq, maxWfreq) / maxWfreq;
+  let arrowLength = 0.6;
+  let radians = Math.PI * wfreqToMaxRatio;
+  let x = arrowLength * Math.cos(radians);
+  let y = arrowLength * Math.sin(radians);
+
+  // Path represent a triangle arrow
+  let path  = `M0,-0.025 L0,0.025 L${x},${y} Z`;
+
+  let data = [
+    //A red circle on the arrow start
+    { type: 'scatter',
+    x: [0], y:[0],
+      marker: {size: 12, color:'850000'},
+      showlegend: false,
+      name: 'Washing Frequency',
+      text: sample.wfreq,
+      hoverinfo: 'text+name'},
+    //9 equal sectors (together take half of the ring), one sector takes another half
+    { values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50],
+    rotation: 90,
+    text: ['8+', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3', '1-2', '0-1', ''],
+    textinfo: 'text',
+    textposition:'inside',
+    marker: {colors:['rgb(132, 181, 137)',  //8+
+                     'rgb(137, 188, 141)',  //7-8
+                     'rgb(138, 192, 134)',  //6-7
+                     'rgb(183, 205, 143)',  //5-6
+                     'rgb(213, 229, 153)',  //4-5
+                     'rgb(229, 232, 176)',  //3-4
+                     'rgb(233, 230, 201)',  //2-3
+                     'rgb(244, 241, 228)',  //1-2
+                     'rgb(248, 233, 236)',  //0-1
+                     'rgba(255, 255, 255, 0)' //Empty
+                    ]},
+    labels: ['8+', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3', '1-2', '0-1', ''],
+    hoverinfo: 'label',
+    hole: .5,
+    type: 'pie',
+    showlegend: false
+  }];
+
+  var layout = {
+    shapes:[{
+        type: 'path',
+        path: path,
+        fillcolor: '850000',
+        line: {
+          color: '850000'
+        }
+      }],
+    title: '<b>Belly Button Washing Frequency</b><br>Scrubs per Week<br> ',
+    height: 350,
+    xaxis: {
+      zeroline:false,
+      showticklabels:false,
+      showgrid: false,
+      range: [-1, 1],
+      //automargin: true
+    },
+    yaxis: {
+      zeroline:false,
+      showticklabels:false,
+      showgrid: false, 
+      range: [-1, 1],
+      //automargin: true
+    },
+    margin: {
+      t: 65,
+      r: 0,
+      b: 0,
+      l: 0
+    }, 
+  };
+
+  Plotly.react('gauge', data, layout, { responsive: true });
 }
 
 function buildCharts(sample_id) {
